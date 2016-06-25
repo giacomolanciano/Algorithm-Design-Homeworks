@@ -7,7 +7,7 @@
  *
  ******************************************************************************/
 
-package roadwork;
+package hw1.roadwork;
 
 import java.io.BufferedInputStream;
 import java.io.File;

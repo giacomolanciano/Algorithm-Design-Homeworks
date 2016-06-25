@@ -1,4 +1,4 @@
-package roadwork.allinone;
+package hw1.roadwork.allinone;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;

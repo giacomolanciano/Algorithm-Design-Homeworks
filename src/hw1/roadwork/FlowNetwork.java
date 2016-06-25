@@ -1,4 +1,4 @@
-package roadwork;
+package hw1.roadwork;
 
 /******************************************************************************
  *  Compilation:  javac FlowNetwork.java

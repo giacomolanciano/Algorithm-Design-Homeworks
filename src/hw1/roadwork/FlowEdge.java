@@ -7,7 +7,7 @@
  *
  ******************************************************************************/
 
-package roadwork;
+package hw1.roadwork;
 
 /**
  *  The <tt>FlowEdge</tt> class represents a capacitated edge with a 

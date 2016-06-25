@@ -1,0 +1,826 @@
+% !TeX spellcheck = en_GB
+\documentclass[a4paper,11pt]{article}
+
+\usepackage{graphicx}
+\usepackage{algorithm2e}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{amsmath}
+
+\begin{document}
+	
+	\title{HW \#2 – Algorithm Design}
+	\author{Giacomo Lanciano 1487019, Davide Mazza 1520961}
+	\date{25 January 2016}
+	\maketitle
+
+\section{Problem 1}
+Our proof is based on the following assumptions
+
+\begin{itemize}
+	\item $S_{j}$ is the set picked by the algorithm at j-th iteration
+	
+	\item $w_j$ is the weight of $S_{j}$
+	
+	\item $\hat{E_{j}}$ is the set of remaining elements at the end of j-th iteration (note that $\hat{E}_{j-1} = E_j$, according to the notation given in the text of the problem)
+	
+	\item $\mathcal{C}_{OPT} = \{ S_{1},\ldots, S_{k}\} $ is the collection of sets that represents the optimal solution to the problem
+	
+	\item $\theta_{j}$ is the ratio between the number of elements that are covered (for the first time) by $S_{j}$ and the corresponding weight, considered as the \textit{cost} paid to use the set, i.e.
+	\begin{align*} 
+	\theta_{j} &= \dfrac{1}{w_{j}} \left| S_{j} \setminus (S_{1} \cup \ldots \cup S_{j-1}) \right| \\
+	&= \dfrac{\left| S_{j} \cap \hat{E}_{j-1} \right| }{w_{j}}
+	\end{align*}
+	
+	\item $c(e)$ is the cost of the element $e \in E$, taking into account the iteration in which is picked, i.e.
+	\begin{align*}
+	c(e) = \dfrac{1}{\theta_{j}}= \dfrac{w_{j}}{\left| S_{j} \cap \hat{E}_{j-1} \right| }	
+	\end{align*}
+	
+	\item we will exploit the property
+	\begin{align}
+	\min_{i \in [1,k]} \ \frac{a_{i}}{b_{i}} \ \le \ \frac{\sum\limits_{i=1}^{k}{a_{i}}}{\sum\limits_{i=1}^{k}{b_{i}}} \ \le \ \max_{i \in [1,k]} \ \frac{a_{i}}{b_{i}} \label{1.4}
+	\end{align}
+\end{itemize}
+
+\subsection{Step 1}
+The greedy algorithm chooses at step $j$ the set $S_{j}$ that maximizes $\theta_{j}$. \\
+In other words, the algorithm picks the set that \textit{minimize} the cost (\textit{per uncovered element}) $c(e)$ at step $j$. The value of $ALG$ is the sum of the weights of the picked sets. Therefore, we can assume that the value of $OPT$ is the \textit{minimum} cost we have to pay to cover each element. \\ 
+Note that it is possible to perform this assumption also in the \textit{Unweighted Set Cover} problem, considering all the sets with a weight equal to 1. \\
+Using property \ref{1.4}, we obtain
+\begin{align*}
+\min_{S_{j} \in \ \mathcal{C}_{OPT}} c(e) &= \min_{S_{j} \in \ \mathcal{C}_{OPT}} \left( \dfrac{w_{j}}{\left| S_{j} \cap \hat{E}_{j-1} \right|} \right) \\ 
+&\le \frac{\sum\limits_{j = 1}^{k}w_{j}}{\sum\limits_{j = 1}^{k}\left| S_{j} \cap \hat{E}_{j-1} \right|} =  \dfrac{OPT}{n-\sum\limits_{i=0}^{j-1}\left| S_{i} \cap \hat{E}_{i-1} \right|}\\
+\nonumber
+\end{align*}
+where $n$ is the number of elements in $E$ and $k$ is the number of sets in $\mathcal{C}_{OPT}$. Therefore, we can conclude that 
+\begin{align*}
+\frac{\left| S_{j} \cap \hat{E}_{j-1} \right|}{w_{j}} \ge \frac{n-\sum\limits_{i=0}^{j-1} \left| S_{i} \cap \hat{E}_{j-1} \right|}{OPT}\\
+\nonumber
+\end{align*}
+If we consider the iterations of the greedy algorithm, we note that
+\begin{align*}
+j &= 1 & &\frac{\left|S_{1}\right|}{w_{1}} \ge \frac{n-\left| \emptyset \right|}{OPT} = \frac{n}{OPT} = \frac{\hat{E}_{0}}{OPT}\\ 
+j &= 2 & &\frac{\left|S_{2} \setminus S_{1} \right|}{w_{2}} \ge \frac{n-\left| \emptyset \right|-\left| S_{1}\cap \hat{E}_{0} \right|}{OPT} = \frac{n - \left| S_{1} \right|}{OPT} = \frac{\hat{E}_{1}}{OPT}\\
+&\ldots & &\ldots \\
+j &= i & &\frac{\left| S_{i} \setminus \left( S_{1} \cup \dots \cup S_{i-1} \right) \right|}{w_{i}} \ge \frac{n-\left| \emptyset \right|- \dots - \left| S_{i-1} \cap \hat{E}_{i-2} \right|}{OPT} = \dfrac{\hat{E}_{i-1}}{OPT}\\
+\end{align*}
+Looking at the cost of each element in the sets picked by the algorithm, we note that
+\begin{align*}
+&\forall e \in S_{1} & &c(e)=\dfrac{w_{1}}{\left| S_{1}\cap \hat{E}_0 \right|} \le \dfrac{OPT}{n-\left| \emptyset \right|} = \dfrac{OPT}{n}\\
+& & &\Rightarrow \quad \dfrac{\left|S_{1}\cap \hat{E}_0\right|}{w_{1}} \ge \dfrac{n}{OPT}\\
+& & &\Rightarrow \quad \dfrac{\left|S_{1}\right|}{w_{1}} \ge \dfrac{n}{OPT}\\\\
+&\forall e \in S_{2} & &c(e)=\dfrac{w_{2}}{\left|S_{2}\cap \hat{E}_{1} \right|} \le \dfrac{OPT}{n-|S_{1}|} = \dfrac{OPT}{n-\left|S_{1}\right|}\\
+& & &\Rightarrow \quad \dfrac{\left|S_{2} \cap \hat{E}_{1} \right|}{w_{2}} \ge \dfrac{n- \left|S_{1} \right|}{OPT}\\
+& & &\Rightarrow \quad \dfrac{\left|S_{2} \setminus S_{1} \right|}{w_{2}} \ge \frac{n-|S_{1}|}{OPT}\\
+\end{align*}
+Therefore, we can conclude the first important result
+\newtheorem{theorem}{Lemma}
+\begin{theorem}
+	Let $S_{j}$ be the j-th set the greedy algorithm chooses, then:
+	\begin{center}
+		$\dfrac{1}{w_{j}} \left| S_{j} \setminus (S_{1} \cup \dots \cup S_{j-1}) \right| \geq \dfrac{\hat{E}_{j-1}}{OPT} $
+	\end{center}
+\end{theorem}
+
+\subsection{Step 2}
+From the \textit{Unweighted Set Cover} problem (recall that this case is equivalent to the \textit{weighted} one where all the weights are equal to 1), we know the difference between two subsequent steps of the greedy algorithm in terms of \textit{still uncovered} elements, i.e.
+\begin{align}
+\hat{E}_{j-1}-\hat{E}_{j}=\left|S_{j} \setminus (S_{1} \cup \dots \cup S_{j-1}) \right| \label{1.8}
+\end{align}
+Taking into account \ref{1.8} and \textit{Lemma 1}, we can conclude
+\begin{align}
+\dfrac{\hat{E}_{j-1}-\hat{E}_{j}}{w_{j}} &= \dfrac{1}{w_{j}} \left| S_{j} \setminus (S_{1} \cup \dots \cup S_{j-1}) \right| \ge \dfrac{\hat{E}_{j-1}}{OPT} \nonumber\\
+\dfrac{\hat{E}_{j}}{w_{j}} &\le \dfrac{\hat{E}_{j-1}}{w_{j}} - \dfrac{\hat{E}_{j-1}}{OPT} \nonumber \\
+\dfrac{\hat{E}_{j}}{w_{j}} &\le \hat{E}_{j-1}\left( \dfrac{1}{w_{j}}-\dfrac{1}{OPT} \right) \nonumber\\
+\hat{E}_{j} &\le \hat{E}_{j-1}\left( 1 -\dfrac{w_{j}}{OPT} \right) \label{1.9}
+\end{align}
+
+\subsection{Step 3}
+From result \ref{1.9} in \textit{Step 2}, we can derive
+\begin{equation}
+\left.\begin{aligned}
+\hat{E}_{1} &\le \hat{E}_{0}\left( 1 -\dfrac{w_{1}}{OPT} \right)\\
+\hat{E}_{2} &\le \hat{E}_{1}\left( 1 -\dfrac{w_{2}}{OPT} \right)
+\end{aligned}
+\quad \right\}
+\quad \hat{E}_{0}\left( 1 -\dfrac{w_{1}}{OPT} \right) \left( 1 -\dfrac{w_{2}}{OPT} \right) \ge \hat{E}_{2} \nonumber
+\end{equation}
+Generalizing this result, we can conclude that
+\begin{align}
+&\hat{E}_{0}\left( 1 -\dfrac{w_{1}}{OPT} \right) \dots \left( 1 -\dfrac{w_{j}}{OPT} \right) \ge \hat{E}_{j} \label{1.10}
+\end{align}
+Therefore, because of \ref{1.10} and given that the algorithm picks $k$ sets to cover all the elements (i.e. performs k iterations), we have
+\begin{align}
+&\hat{E}_{0}\left( 1 -\dfrac{w_{1}}{OPT} \right) \dots \left( 1 -\dfrac{w_{k}}{OPT} \right) < 1 \label{1.11}
+\end{align}
+Since $\ 1-x \le e^{-x}$, we can rewrite \ref{1.11}
+\begin{align}
+&\hat{E}_{0} \cdot e^{-\dfrac{w_{1}}{OPT}} \dots e^{-\dfrac{w_{k}}{OPT}} = \hat{E}_{0} \cdot e^{\dfrac{-\sum\limits_{j = 1}^{k}w_{j}}{OPT}} < 1 \label{1.12}
+\end{align}
+Applying the natural logarithm function to both members in \ref{1.12}, we obtain
+\begin{align}
+&\ln\hat{E}_{0} - \dfrac{\sum\limits_{j = 1}^{k}w_{j}}{OPT} < 0 \nonumber\\
+&\dfrac{\sum\limits_{j = 1}^{k}w_{j}}{OPT} > \ln\hat{E}_{0} \nonumber\\
+\nonumber\\
+&ALG > OPT \cdot \ln\hat{E}_{0} \label{1.13}
+\end{align}
+The result \ref{1.13} proves that the greedy algorithm is a $\ln n$-approximation for the \textit{Weighted Set Cover} problem.
+
+
+\newpage
+\section{Problem 2}
+\subsection{Task 1}
+Our proof is based on the following assumptions
+\begin{itemize}
+	\item each element $e \in E$ is numbered according to the order in which is covered by the algorithm
+	
+	\item $c(e_j)$ is the cost paid to cover the j-th element (covered by the algorithm), assuming that
+	\begin{align*}
+	c(e_j) \leq \frac{OPT_{SC}}{n-j+1}
+	\end{align*}
+	(\underline{Note}: $\ n-j+1 \ $ is the number of \textit{still uncovered} elements at the time in which $e_j$ is considered)
+	
+	\item $n'$ is the number of elements that are covered  before the last iteration of the algorithm, assuming that
+	\begin{align*}
+	n' < \lceil n\cdot p \rceil
+	\end{align*}
+	
+	\item $H_n$ is the value of the harmonic series, considered until the n-th term, and it is well-known that it is majorized by the natural logarithm, i.e.
+	\begin{align}
+	H_n &= 1 + \frac{1}{2} + \frac{1}{3}+...+\frac{1}{n} \nonumber\\ &\leq \ln n \label{2.1}
+	\end{align}
+	
+\end{itemize}
+Let us consider the following inequality
+\begin{align}
+\sum_{j=1}^{n'} c(e_j) \leq \sum_{j=1}^{n'}\frac{OPT_{SC}}{n-j+1} = (H_n - H_{n - n'}) \cdot OPT_{SC} \label{2.2}
+\end{align}
+We can use \ref{2.1} to rewrite the right member of \ref{2.2}, obtaining
+\begin{align*}
+(H_n - H_{n-n'}) \cdot OPT_{SC} &\leq (\ln(n) - \ln(n - n')) \cdot OPT_{SC}\\ 
+&\leq (\ln(n) -\ln(n - np)) \cdot OPT_{SC}\\ 
+&\leq \ln\left(\frac{n}{n(1-p)}\right)\cdot OPT_{SC}\\
+&\leq \ln\left(\frac{1}{1-p}\right)\cdot OPT_{SC}
+\end{align*}
+The cost of the last iteration can be at most $OPT_{SC}$. Therefore,
+\begin{align*}
+ALG \leq \ln\left(\frac{1}{1-p}\right)\cdot OPT_{SC} + OPT_{SC} = \left(\ln\left(\frac{1}{1-p}\right)+1\right) \cdot OPT_{SC}
+\end{align*}
+Hence, we proved that
+\begin{align*}
+ALG \leq \left(\ln\left(\frac{1}{1-p}\right) +1\right) \cdot OPT_{SC}
+\end{align*}
+
+
+\subsection{Task 2}
+Our proof is based on the following assumptions
+\begin{itemize}
+	\item $S_{j}$ is the set picked by the algorithm at j-th iteration
+	
+	\item $n_j$ is the number of elements \textit{still uncovered} at the end of j-th iteration of the algorithm, i.e.
+	
+	\item $\mathcal{C}_{OPT_{PSC}} = \{ S_{1},\ldots, S_{OPT_{PSC}}\} $ is the collection of sets that represents the optimal solution to the problem
+	\begin{align}
+	n_0 &= \lceil np \rceil\nonumber\\
+	n_1 &= \lceil np \rceil - \left|S_1\right|\nonumber\\
+	n_2 &= n_1 - \left|S_2  \setminus S_1\right|\nonumber\\
+	&\dots\nonumber\\
+	n_j &= n_{j-1} - \left|S_j \setminus (S_1 \cup \dots \cup S_{j-1})\right| \label{2.0} 
+	\end{align}
+	
+\end{itemize}
+
+
+\subsubsection{Step 1}
+At each iteration, the greedy algorithm picks the set that covers the greatest number of \textit{still uncovered} elements of $E$. Therefore, considering the first iteration, we can assume what follows
+\begin{align*}
+|S_1| &\geq |S_{1}|\\
+|S_1| &\geq |S_{2}|\\
+&\dots\\
+|S_1| &\geq |S_{OPT_{PSC}}|
+\end{align*}
+Summing all the inequalities, we obtain
+\begin{align}
+OPT_{PSC} \cdot |S_1| &\geq |S_{1}| + |S_{2}| + \dots + |S_{OPT_{PSC}}|\nonumber\\
+|S_1| &\geq \frac{1}{OPT_{PSC}}\cdot(|S_{1}| + |S_{2}| + \dots + |S_{OPT_{PSC}}|) \label{2.3}
+\end{align}
+By the definition of the \textit{Partial Set Cover} problem we know that 
+\begin{align}
+|S_{1}| + |S_{2}| + \dots + |S_{OPT_{PSC}}| \geq \lceil np \rceil = n_0 \label{2.4}
+\end{align}
+Then, we can use result \ref{2.4} to rewrite inequality \ref{2.3} as follow
+\begin{align*}
+|S_1| \geq \frac{n_0}{OPT_{PSC}}
+\end{align*}
+Considering the second iteration of the algorithm, we can assume what follows
+\begin{align*}
+|S_2 \setminus S_1| &\geq |S_{1} \setminus S_1|\\
+|S_2 \setminus S_1| &\geq |S_{2} \setminus S_1|\\
+&\dots\\
+|S_2 \setminus S_1| &\geq |S_{OPT_{PSC}} \setminus S_1|
+\end{align*}
+Again, summing all the inequalities, we obtain
+\begin{align}
+|S_2 \setminus S_1| \geq \frac{1}{OPT_{PSC}} \cdot (|S_{1} \setminus S_1| + |S_{2} \setminus S_1| + \dots + |S_{OPT_{PSC}} \setminus S_1|) \label{2.5}
+\end{align}
+By the definition of the \textit{Partial Set Cover} problem we know that 
+\begin{align}
+|S_{1} \setminus S_1| + |S_{2} \setminus S_1| + \dots + |S_{OPT_{PSC}} \setminus S_1| \geq \lceil np \rceil - |S_1| = n_1 \label{2.6}
+\end{align}
+Then, we can use result \ref{2.6} to rewrite inequality \ref{2.5} as follow
+\begin{align*}
+|S_2 \setminus S_1| \geq \frac{n_1}{OPT_{PSC}}
+\end{align*}
+Generalizing the results, we obtain
+\begin{align}
+|S_j \setminus (S_1 \cup S_2 \cup ... \cup S_{j-1})| \geq \frac{n_{j-1}}{OPT_{PSC}} \label{2.8}
+\end{align}
+Because of result \ref{2.0}, we can rewrite inequality \ref{2.8} as follows
+\begin{align}
+n_{j-1} - n_j \geq \frac{n_{j-1}}{OPT_{PSC}} \label{2.9}
+\end{align}
+
+\subsubsection{Step 2}
+Considering result \ref{2.9}, we conclude that
+\begin{align}
+n_{j-1} - n_j &\geq \frac{n_{j-1}}{OPT_{PSC}}\nonumber\\
+n_j &\leq n_{j-1} - \frac{n_{j-1}}{OPT_{PSC}}\nonumber\\
+n_j &\leq n_{j-1}\cdot \left(1 - \frac{1}{OPT_{PSC}}\right) \label{2.10}
+\end{align}
+
+
+
+
+\subsubsection{Step 3}
+From result \ref{2.10} in \textit{Step 2}, we can derive
+\begin{equation}
+\left.\begin{aligned}
+n_{1} &\le n_{0}\left( 1 -\dfrac{1}{OPT_{PSC}} \right)\\
+n_{2} &\le n_{1}\left( 1 -\dfrac{1}{OPT_{PSC}} \right)
+\end{aligned}
+\quad \right\}
+\quad n_0 \cdot  \left(1 - \frac{1}{OPT_{PSC}}\right)^2 \geq n_2 \nonumber
+\end{equation}
+Generalizing this result, we can conclude that
+\begin{align}
+n_{0}\left( 1 -\dfrac{1}{OPT_{PSC}} \right)^j \ge n_{j} \label{2.11}
+\end{align}
+To compute the number of iterations of the greedy algorithm, we need to find a value $k$ (of iterations) such that
+\begin{align}
+n_{0}\left( 1 -\dfrac{1}{OPT_{PSC}} \right)^k < 1 \label{2.12}
+\end{align}
+Since $\ 1-x \leq e^{-x} \ $, we can rewrite \ref{2.12} as follows
+\begin{align}
+n_0 \cdot  e^{-\dfrac{k}{OPT_{PSC}}} &< 1 \nonumber\\
+\lceil np \rceil \cdot e^{-\dfrac{k}{OPT_{PSC}}} &< 1 \nonumber\\
+\ln\left(\lceil np \rceil\cdot e^{-\dfrac{k}{OPT_{PSC}}}\right) &< 0 \nonumber\\
+\ln \lceil np \rceil + \ln \left(e^{-\dfrac{k}{OPT_{PSC}}}\right ) &< 0 \nonumber\\
+\ln \lceil np \rceil - \frac{k}{OPT_{PSC}} &< 0 \nonumber\\
+\nonumber\\
+OPT_{PSC} \cdot \ln \lceil np \rceil &< k \label{2.13}
+\end{align}
+From result \ref{2.13}, defining $\ k =  OPT_{PSC} \cdot (\ln (np) + 1) \ $, we conclude that
+\begin{align}
+ALG \leq OPT_{PSC} \cdot (\ln(np) + 1)
+\end{align}
+i.e. the algorithm uses at most $OPT_{PSC} \cdot (\ln(np) + 1)$ sets to cover all the elements.
+
+
+\newpage
+\section{Problem 3}
+
+\subsection{Step 1}
+Given that the algorithm halts in $n$ steps, if it adds $i$ vertices to $X$, it also removes $n-i$ (different) vertices from $Y$. Therefore, $X_n = Y_n$.\\
+Let us consider the sequence $S_i = \delta(X_i) + \delta(Y_i)$. Given the relation between $X_n$ and $Y_n$, we can conclude that
+\begin{align*}
+S_n &= \delta(X_n) + \delta(Y_n)\\
+&= \delta(X_n) + \delta(X_n)\\ 
+&= 2\delta(X_n)
+\end{align*}
+Therefore, we have proved that
+\begin{align}
+\delta(X_n) = \frac{1}{2}S_n \label{3.1}
+\end{align}
+
+
+\subsection{Step 2}
+Let us consider the sequence 
+\begin{align*}
+O_0 = \delta((OPT \cup X_0) \cap Y_0) + \delta((\overline{OPT} \cup X_0) \cap Y_0)
+\end{align*}
+Since $X_0 = \emptyset$ and $Y_0 = V$, we can conclude that
+\begin{align*}
+OPT \cup X_0 = OPT \cap Y_0 = OPT
+\end{align*}
+Therefore,
+\begin{align*}
+O_0 &= \delta(OPT \cap Y_0) + \delta(\overline{OPT} \cap Y_0)\\
+&= \delta(OPT) + \delta(\overline{OPT})
+\end{align*}
+Since the graph is undirected, we conclude that $\delta(S) = \delta(\bar S)$. In fact, for each out-coming edge $ e = \{ u,v \} $ of S (i.e. such that $ u \in S$ but $v \not \in$ S) there is a corresponding edge $ e' = \{ v,u \} $ such that  $v \not \in$ S but $ u \in S$.\\ 
+Therefore, we have proved that
+\begin{align}
+O_0 =2 \delta(OPT) \label{3.2}
+\end{align}
+Let us consider the sequence
+\begin{align*}
+O_n = \delta((OPT \cup X_n) \cap Y_n) + \delta((\overline{OPT} \cup X_n) \cap Y_n)
+\end{align*}
+Since $X_n = Y_n$, we can rewrite $O_n$ as
+\begin{align*}
+O_n &= \delta((OPT \cup X_n) \cap X_n) + \delta((\overline{OPT} \cup X_n) \cap X_n)\\
+&= \delta( X_n) + \delta(X_n)\\ 
+&= 2\delta(X_n)
+\end{align*}
+Therefore, we have proved that
+\begin{align}
+O_n =2 \delta(X_n) \label{3.3}
+\end{align}
+
+
+\subsection{Step 3}
+Note that $ \delta(S \cap T) = \delta(S)$ and $ \delta(S \cup T) = \delta(T)$. Therefore,
+\begin{align*}
+\delta(S) + \delta(T) \geq \delta(S \cap T) + \delta(S \cup T)
+\end{align*}
+Let $S'$ and $T'$ be two sets such that $S' = S \cup \{v\}$ and $T' = T$. Therefore,
+\begin{align*}
+\delta(S \cup \{v\}) + \delta(T) &=  \delta(S') + \delta(T')\\
+&\geq \delta(S' \cap T') +  \delta(S' \cup T')
+\end{align*}
+Since $v \not \in S $ (from the fact that, by definition of submodularity, $v \not \in T$ and $S \subseteq T$), we note that $ \delta(S' \cap T') = \delta(S)$ and $\delta(S' \cup T') = \delta(T \cup \{v\})$. Therefore, we conclude that
+\begin{align*}
+\delta(S \cup \{v\}) + \delta(T)  &\geq \delta(S) +  \delta(T \cup \{v\})\\
+\delta(S \cup \{v\}) - \delta(S)  &\geq \delta(T \cup \{v\}) - \delta(T) 
+\end{align*}
+We have proved that
+\begin{align}
+\delta(T \cup \{v\}) - \delta(T) &\leq \delta(S \cup \{v\}) - \delta(S) \label{3.4}
+\end{align}
+
+
+\subsection{Step 4}
+By definition of $S_{i}$, we can rewrite the left member of the inequality
+\begin{align*}
+S_{i+1} - S_i &= \delta(X_{i+1}) - \delta(X_{i})  + \delta(Y_{i+1})  - \delta(Y_{i})
+\end{align*}
+Therefore,
+\begin{align*}
+\delta(X_{i+1}) - \delta(X_{i})  + \delta(Y_{i+1})  - \delta(Y_{i}) &\geq O_i - O_{i+1}	
+\end{align*}
+We proceed by dividing the proof in sub-cases.
+
+\subsubsection{Case 1: $ a_{i+1} \geq b_{i+1}$}
+\begin{align*}
+\delta(X_{i} + v_{i+1}) - \delta(X_{i})  \geq \delta(Y_{i} - v_{i+1})  - \delta(Y_{i})
+\end{align*}
+Since $Y_{i+1} = Y_i$, in sub-cases we will proceed by proving that
+\begin{align*}
+\delta(Y_{i} - v_{i+1})  - \delta(Y_{i})  &\geq  O_i - O_{i+1} & &\quad(i)
+\end{align*}
+Then, we conclude that 
+\begin{align*}
+\delta(X_{i} + v_{i+1}) - \delta(X_{i})  \geq O_i - O_{i+1}
+\end{align*}
+Therefore, since $\ S_{i+1} - S_i \geq \delta(X_{i} + v_{i+1}) - \delta(X_{i}) \ $, we prove
+\begin{align}
+S_{i+1} - S_i  \geq O_i - O_{i+1} \label{3.5}
+\end{align}
+Before showing sub-cases, we recall that
+\begin{align*}
+O_i &= \delta((OPT \cup X_i) \cap Y_i) + \delta((\overline{OPT} \cup X_i) \cap Y_i) & &\quad(ii)\\
+O_{i+1} &= \delta((OPT \cup (X_{i} + v_{i+1})) \cap Y_{i}) + \delta((\overline{OPT} \cup (X_{i} + v_{i+1})) \cap Y_{i}) & &\quad(iii)\\
+\end{align*}
+
+\begin{itemize}
+	\item[1.1)] $ v_{i+1} \in OPT$
+	\begin{align*}
+	\delta((OPT \cup X_i) \cap Y_i) = \delta((OPT \cup (X_{i} + v_{i+1})) \cap Y_{i}) 
+	\end{align*} 
+	because of (i), we can conclude
+	\begin{align*}
+	\delta(Y_{i} - v_{i+1})  - \delta(Y_{i}) &\geq  \delta((\overline{OPT} \cup X_i) \cap Y_i)\\ &\quad - \delta((\overline{OPT} \cup (X_{i} + v_{i+1})) \cap Y_{i})\\\\
+	-\delta(Y_{i} - v_{i+1})  + \delta(Y_{i})  &\leq  - \delta((\overline{OPT} \cup X_i) \cap Y_i)\\ &\quad + \delta((\overline{OPT} \cup (X_{i} + v_{i+1})) \cap Y_{i})
+	\end{align*} 
+	Note that
+	\begin{align*}
+	((\overline{OPT} \cup X_i) \cap (Y_i - v_{i+1})) \subseteq (Y_i - v_{i+1})
+	\end{align*} 
+	Let us consider the two sets S and T, such that
+	\begin{align*}
+	S &= ((\overline{OPT} \cup X_i) \cap Y_i) = ((\overline{OPT} \cup X_i) \cap (Y_i - v_{i+1}))\\
+	T &= (Y_i - v_{i+1})
+	\end{align*} 
+	Since $\ S \subseteq T \ $ and $\ v_{i+1} \not \in T \ $, by definition of submodularity we obtain 
+	\begin{align*}
+	\delta(S + v_{i+1}) - \delta(S)  \geq  \delta(T + v_{i+1}) - \delta(T)
+	\end{align*}  
+	Then, we have
+	\begin{align*}
+	\delta(Y_{i} - v_{i+1})  - \delta(Y_{i})  \geq  O_i - O_{i+1}
+	\end{align*}
+	As we described above, we conclude that
+	\begin{align*}
+	\quad S_{i+1} - S_i  \geq O_i - O_{i+1}
+	\end{align*}
+	
+	\newpage
+	\item[1.2)] $ v_{i+1} \not  \in OPT$
+	\begin{align*}
+	\delta((\overline{OPT} \cup X_i) \cap Y_i) = \delta((\overline{OPT} \cup (X_{i} + v_{i+1})) \cap Y_{i})
+	\end{align*}
+	because of (i), we can conclude
+	\begin{align*}
+	\delta(Y_{i} - v_{i+1})  - \delta(Y_{i}) &\geq  \delta((OPT \cup X_i) \cap Y_i)\\ &\quad - \delta((OPT \cup (X_{i} + v_{i+1})) \cap Y_{i})\\\\
+	-\delta(Y_{i} - v_{i+1})  + \delta(Y_{i})  &\leq  - \delta((OPT \cup X_i) \cap Y_i)\\ &\quad + \delta((OPT \cup (X_{i} + v_{i+1})) \cap Y_{i})
+	\end{align*}
+	Let us consider the two sets S and T, such that
+	\begin{align*}
+	S &= ((OPT \cup X_i) \cap Y_i) = ((OPT \cup X_i) \cap (Y_i - v_{i+1}))\\
+	T &= (Y_i - v_{i+1})
+	\end{align*}
+	Since $\ S \subseteq T \ $ and $\ v_{i+1} \not \in T \ $, by definition of submodularity we obtain
+	\begin{align*}
+	\delta(S + v_{i+1}) - \delta(S)  \geq  \delta(T + v_{i+1}) - \delta(T)
+	\end{align*}
+	that bring us to the same conclusion of the previous sub-case.
+	
+\end{itemize}
+
+\subsubsection{Case 2: $ a_{i+1} < b_{i+1}$}
+\begin{align*}
+\delta(X_{i} + v_{i+1}) - \delta(X_{i})  < \delta(Y_{i} - v_{i+1})  - \delta(Y_{i})
+\end{align*}
+Since $X_{i+1} = X_i$, in sub-cases we will proceed by proving that
+\begin{align*}
+\delta(X_{i} + v_{i+1})  - \delta(X_{i}) &\geq  O_i - O_{i+1} & &\quad (iv)
+\end{align*}
+Then, we conclude that 
+\begin{align*}
+\delta(Y_{i} - v_{i+1}) - \delta(Y_{i})  \geq O_i - O_{i+1}
+\end{align*}
+Therefore, since $\ S_{i+1} - S_i \geq \delta(Y_{i} - v_{i+1}) - \delta(Y_{i}) \ $, we prove
+\begin{align*}
+S_{i+1} - S_i  \geq O_i - O_{i+1}
+\end{align*}
+Before showing sub-cases, we recall that
+\begin{align*}
+O_i &= \delta((OPT \cup X_i) \cap Y_i) + \delta((\overline{OPT} \cup X_i) \cap Y_i)& &(v)\\
+O_{i+1} &= \delta((OPT \cup X_{i}) \cap (Y_{i} - v_{i+1})) + \delta((\overline{OPT} \cup X_{i}) \cap (Y_{i} - v_{i+1}))& &(vi)\\
+\end{align*}
+
+\begin{itemize}
+	\item[2.1)] $ v_{i+1} \in OPT$
+	\begin{align*}
+	\delta((\overline{OPT} \cup X_i) \cap Y_i) = \delta((\overline{OPT} \cup X_{i}) \cap (Y_{i} - v_{i+1}))
+	\end{align*}
+	because of (iv), (v) and (vi) we can conclude
+	\begin{align*}
+	\delta(X_{i} + v_{i+1})  - \delta(X_{i}) &\geq  \delta((OPT \cup X_i) \cap Y_i)\\ &\quad - \delta((OPT \cup X_{i}) \cap (Y_{i} - v_{i+1}))\\\\
+	-\delta(X_{i} + v_{i+1})  + \delta(X_{i}) &\leq  - \delta((OPT \cup X_i) \cap Y_i)\\ &\quad + \delta((OPT \cup X_{i}) \cap (Y_{i} - v_{i+1}))
+	\end{align*}
+	Note that 
+	\begin{align*}
+	X_i \subseteq ((OPT \cup X_{i}) \cap (Y_{i} - v_{i+1}))
+	\end{align*}
+	Let us consider the two sets S and T, such that
+	\begin{align*}
+	S &= X_i \\
+	T &=((OPT \cup X_{i}) \cap (Y_{i} - v_{i+1}))
+	\end{align*} 
+	Since $\ S \subseteq T \ $ and $\ v_{i+1} \not \in T \ $, by definition of submodularity we obtain
+	\begin{align*}
+	\delta(S + v_{i+1}) - \delta(S)  \geq  \delta(T + v_{i+1}) - \delta(T)
+	\end{align*}
+	Then, we have
+	\begin{align*}
+	\delta(X_{i} + v_{i+1})  - \delta(X_{i})   \geq  O_i - O_{i+1} 
+	\end{align*}
+	As we described above, we conclude that
+	\begin{align*}
+	\quad S_{i+1} - S_i  \geq O_i - O_{i+1}
+	\end{align*}
+	
+	
+	
+	\item[2.2)] $ v_{i+1} \not  \in OPT$
+	\begin{align*}
+	\delta((OPT \cup X_i) \cap Y_i) = \delta((OPT \cup X_{i}) \cap (Y_{i} - v_{i+1})) 
+	\end{align*}
+	because of (iv), (v) and (vi) we can conclude
+	\begin{align*}
+	\delta(X_{i} + v_{i+1})  - \delta(X_{i}) &\geq  \delta((\overline{OPT} \cup X_i) \cap Y_i)\\ &\quad - \delta((\overline{OPT} \cup X_{i}) \cap (Y_{i} - v_{i+1}))\\
+	-\delta(X_{i} + v_{i+1})  + \delta(X_{i}) &\leq  - \delta((\overline{OPT} \cup X_i) \cap Y_i)\\ &\quad + \delta((\overline{OPT} \cup X_{i}) \cap (Y_{i} - v_{i+1}))
+	\end{align*}
+	Note that 
+	\begin{align*}
+	X_i \subseteq ((\overline{OPT} \cup X_{i}) \cap (Y_{i} - v_{i+1}))
+	\end{align*}
+	Let us consider the two sets S and T, such that
+	\begin{align*}
+	S &= X_i\\
+	T &=((\overline{OPT} \cup X_{i}) \cap (Y_{i} - v_{i+1}))
+	\end{align*} 
+	Since $\ S \subseteq T \ $ and $\ v_{i+1} \not \in T \ $, by definition of submodularity we obtain
+	\begin{align*}
+	\delta(S + v_{i+1}) - \delta(S)  \geq  \delta(T + v_{i+1}) - \delta(T)
+	\end{align*}
+	Then, we have
+	\begin{align*}
+	\delta(X_{i} + v_{i+1})  - \delta(X_{i})   \geq  O_i - O_{i+1} 
+	\end{align*}
+	As we described above, we conclude that
+	\begin{align*}
+	\quad S_{i+1} - S_i  \geq O_i - O_{i+1}
+	\end{align*}
+	
+	
+\end{itemize}
+
+
+\subsection{Step 5}
+Using results \ref{3.1}, \ref{3.2}, \ref{3.3} and \ref{3.5} we can prove the claim \textit{by contradiction}. Suppose that
+\begin{align*}
+2\delta(X_n) < \delta(OPT)
+\end{align*}
+Applying the results we obtain
+\begin{align*}
+O_n \overset{\ref{3.3}}{=} 2\delta(X_n) &< \delta(OPT) \overset{\ref{3.2}}{=} \dfrac{O_0}{2}\\
+2O_n &<  O_0\\
+O_n + O_n &<  O_0\\
+O_n &< O_0 - O_n\\
+O_n \overset{\ref{3.3}}{=} 2\delta(X_n) \overset{\ref{3.1}}{=} S_n &< O_0 - O_n\\
+S_n - S_0 &< O_0 - O_n
+\end{align*}
+where the last step is justified by the fact that $S_0 = 0$.\\
+Then, we show a counter example, noting that for $n=1$ result \ref{3.5} is contradicted. Therefore,
+\begin{align*}
+2\delta(X_n) \geq \delta(OPT)
+\end{align*}
+
+
+\newpage
+\section{Problem 4}
+Our resolution strategy is based on building the optimal integer solution through a dual problem and a pair of Restricted Primal Problem - Restricted Dual Problem, which will be used to find a feasible solution to the Primal problem, also satisfying the complementary slackness conditions.\\
+
+First of all, we write the \textit{node-arc incidence matrix} $A$, such that there is a column for every possible edge $j \in E$ and a row for every possible node  $i \in V$ . The value of slot $a_{i,j}$ is equal to $-1$ if the the arc j ends in node $i$, to $1$ if the the arc j starts from node $i$ and to $0$ otherwise.\\
+Note that, in our case, $A$ will have exactly two entries different from $0$. Assume that in the dual problem entries: 
+\begin{itemize}
+\item
+$-1$ is denoted as $\pi_j$
+\item 
+$1$ is denoted as $\pi_i$
+\end{itemize}
+Therefore, the Dual Problem is the following
+\begin{align*}
+	&\max \quad \pi_s - \pi_t\\
+	&s.t. \quad \pi_i - \pi_j \le c_{ij} \quad \forall (i,j) \in E
+\end{align*}
+%Note that since in the Primal Problem we have got only equality constraints, we don't need to add any sign constraint to the dual variables.\\
+Let $J$ be a set that contains all the edges $(i,j)$ such that $$\pi_i - \pi_j = c_{ij}$$ 
+Note that $J$ contains all the admissible edges that will be used to compute the optimal s-t path, the one linked to a feasible solution for both the Primal and the Dual problem. Because this solution satisfies the complementary slackness condition, it will also be the optimal one. \\
+
+We choose $\ \pi_i =0 \quad \forall i \ $ and $\ J = \emptyset \ $ as starting dual feasible solution, because we know that $c_{ij} > 0 \quad \forall (i,j) \in E$. \\
+Let us analyse the constraints of the Primal problem, assuming that the source $s$ has no incoming edges and the destination $t$ has no outgoing edges. \\ 
+%Even if there are some edges of this kind, in any case they would never be included in the shortest path. In fact, if we start from $s$, it would be meaningless to travel in a path that brings back to $s$ and we if need to get to $t$, once we get there, we would not move again and so both those kind of arcs will never be used.\\
+Focusing on the first two constraints of the Primal Problem, we note that every edge that is positive in one constraint, will be negative in the other.\\ 
+Summing these constraints, we obtain
+\begin{align*}
+	\sum_{vt\in \delta^{in}(t)} x_{vt} &= 1\\
+	- \sum_{vt\in \delta^{in}(t)} x_{vt} &= -1
+\end{align*}
+Therefore, we can ignore the last constraint, because it will always be satisfied by a solution that satisfies the others.\\
+We redefine the Dual problem as follows
+\begin{align*}
+	&\max \quad \pi_s\\
+	&s.t. \quad \pi_i - \pi_j \le c_{ij} \quad \forall (i,j) \in E\\
+	&\qquad \ \pi_t = 0
+\end{align*}
+In what follows, we denote as $\pi$ the solution of this Dual Problem.\\
+
+Let us introduce the notions of Restricted Primal problem and Restricted Dual problem.\\ 
+The idea of this procedure is to start from a feasible solution to the dual problem and modify it until a primal feasible solution that satisfies the complementary slackness condition is found. To do so, we define a Restricted Primal Problem. When the value of this solution is null, then we know that the actual feasible solution is optimal (because  satisfies the complementary slackness and the primary constraints).\\ 
+In our case, the Restricted Primal problem is the following
+\begin{align*}
+	&\min \quad \sum_{i\ne t} X^{a}_{i}\\
+	&s.t. \quad \sum_{sv\in \delta^{out}(s)} x_{sv} + X^{a}_{s} = 1\\
+	&\qquad \ \sum_{uv\in \delta^{out}(u)} x_{uv}  - \sum_{vu\in \delta^{in}(u)} x_{vu} + X^{a}_{i} = 0    \quad \forall u \ne s,t \\
+	&\qquad \ x_{uv} \ge 0 \quad (u,v) \in J\\
+	&\qquad \ x_{uv} = 0  \quad (u,v) \notin J\\
+\end{align*}
+It follows that the Restricted Dual is:
+\begin{align*}
+	&\max \quad \bar{\pi_s}\\
+	&s.t. \quad \bar{\pi_i} - \bar{\pi_j} \le 0 \quad \forall (i,j) \in J\\
+	&\qquad \ \bar{\pi_t} = 0 \quad , \quad \bar{\pi_i} \le 1 \quad \forall i \ne t
+\end{align*}
+%Note that all the restricted dual variables has to be less or equal to 1, and so the max solution of this problem could only be 1.\\
+Note that the solution of the primal problem cannot be less than the one of the dual. Therefore, if the solution of the dual is equal to 1, the primal solution must be at least 1.\\ 
+To solve the Restricted Dual problem, we initialize all the restricted dual variables $\bar{\pi}$ to 1 except for $\bar{\pi_t}$, that is set to 0 (because we are ignoring the third constraint). We assume that if a variable $\bar{\pi_i}$ is set to 0, then node $t$ is reachable from node $i$ using the edges in $J$ (admissible edges). \\
+The idea is to find a path from the source to the destination. Each time this task is completed, we set to zero the corresponding variable. If  $\bar{\pi_s}=0$, then the solution of both the Restricted Dual and the Restricted Primal is 0. In this case, we get the optimal solution.\\
+In the first iteration, we have that $\ \bar{\pi_i} = 1 \quad \forall i \ne t \ $  and $\ \bar{\pi_t} = 0 \ $. Therefore,
+\begin{align*}
+	\bar{\pi_i} - \bar{\pi_j} \le 0 \quad \forall (i,j) \in J 
+\end{align*}
+is satisfied since J does not contain any elements, and
+\begin{align*}
+	\bar{\pi_t} = 0 \quad , \quad \bar{\pi_i} \le 1 \quad \forall i \ne t
+\end{align*}
+is trivially satisfied. Since all the constraints of Restricted Dual Problem are satisfied, this is a feasible solution for it.\\ 
+Note that the value of this solution is equal to 1, then the solution of the Restricted Primal Problem cannot be equal to 0, because it cannot be less than 1. Therefore, the solution in not optimal, meaning that it is not possible to produce a path from $s$ to $t$ with the admissible edges.\\
+At this point, we create one more dual feasible solution (to add the needed edges) and then solve again the Restricted Primal Problem.\\
+Let us consider the solution
+\begin{align*}
+	\pi' = \pi + \theta \bar{\pi} \qquad \theta > 0
+\end{align*}
+Our aim is to find a value of $\theta$ such that all the constraints are satisfied and $\pi$ is still feasible. In particular, the following inequality should hold
+\begin{align*}
+	\pi_i - \pi_j + \theta (\bar{\pi_i} - \bar{\pi_j}) \le c_{ij} \quad \forall (i,j) \in E
+\end{align*}
+Note that the value of $(\bar{\pi_i} - \bar{\pi_j}) $ should be greater than 0, otherwise we would not improve the dual solution. Therefore, we add to J an edge $(i,j)$ such that node $i$ does not contain a path to $t$ (i.e. $\bar{\pi_i} = 1$ and $\bar{\pi_j} =0$, which means that $t$ is reachable from node $j$ trough the use of admissible edges). \\
+To achieve the optimality, we will include the edge that satisfies the above conditions and that has minimum $\theta$.
+Let us find the value of $\theta$.
+\begin{align*}
+	&\pi_i - \pi_j + \theta (\bar{\pi_i} - \bar{\pi_j}) \le c_{ij} & &\forall (i,j) \in E\\
+	&\theta \le \frac{c_{ij} - (\pi_i - \pi_j)} {\bar{\pi_i} - \bar{\pi_j}} & &\bar{\pi_i} - \bar{\pi_j} \ge 0
+\end{align*}
+Since $\ \bar{\pi_i} - \bar{\pi_j} = 1 \ $ we can ignore it.
+\begin{align*}
+	\theta &\le c_{ij} - (\pi_i - \pi_j)\\
+	\theta &= \min \quad c_{ij} - (\pi_i - \pi_j)
+\end{align*}
+Assuming that the minimum value is achieved with an edge $(q,w)$, we get
+\begin{align*}
+	\theta =  c_{qw} - (\pi_q - \pi_w)
+\end{align*}
+Therefore, we have then that
+\begin{align*}
+	\pi_q - \pi_w + \theta (\bar{\pi_q} - \bar{\pi_w}) &\le c_{qw}\\
+	\pi_q - \pi_w + \theta &\le c_{qw}\\
+	\pi_q - \pi_w + c_{qw} - (\pi_q - \pi_w) &\le c_{qw}\\
+	0 &\le 0
+\end{align*}
+Note that this constraint has become tight. Then, we have
+\begin{align*}
+	\pi'_q - \pi'_w = c_{qw}
+\end{align*} 
+i.e. the edge $(q,w)$ has been added to J.\\
+We found a new feasible solution, but we also have to check if it is optimal. To do this, we repeat the process described above. If the outcome is still negative, then we improve the dual solution and try again to check the optimality. \\
+
+The algorithm we used to find the optimal solution is based on Dijkstra's shortest path algorithm. \\
+Let $P$ be the set containing all the nodes $i$ such that there is a $i-t$ path using only admissible arcs. As in Dijkstra's algorithm, if a node enter in $P$, it will never leave it. In addition, at each iteration, the algorithm adds to $J$ the edge that leads to a new node with the lowest cost.\\
+When node $t$ becomes reachable from node $i$, the restricted dual variable $ \bar{\pi_i}$ is set to 0 in all the following iterations. Since
+\begin{align*}
+	\pi' = \pi + \theta \bar{\pi}
+\end{align*} 
+we can conclude that 
+\begin{align*}
+\pi'_i &= \pi_i + \theta \bar{\pi_i}\\
+\pi'_i &= \pi_i + \theta (0)\\
+\pi'_i &= \pi_i
+\end{align*} 
+The algorithm can be seen as a backward iteration of Dijkstra's algorithm. In fact, when $i$ enter in $P$, the value of $\pi_i$ will remain the same for all the following iterations (representing the shortest path between $i$ and $t$).
+
+\clearpage
+
+\section{Problem 5}
+The price of anarchy is given by 
+$$\frac{max_{s\in E}( \begin{matrix} \sum_{i\in N} \quad c_i (s) \end{matrix})} {min_{s\in S} (\begin{matrix} \sum_{i\in N}  \quad c_i (s) \end{matrix})}$$
+where:
+\begin{itemize}
+\item
+$S$ is a set of states 
+\item
+$E \subseteq S$ is a non empty set such that $E$ is in equilibria
+\end{itemize}
+We assume to be in the same scenario as the standard Pigou's example. There is then one unit of traffic, controlled by a very large population of players, that has to be routed in the network.\\
+The only pure Nash equilibrium of the game is the one that  grants the lowest path cost, i.e. the player chooses to get to the destination through the lower edge.
+Therefore, all the flow will pass in the lower edge, resulting in a social cost of $1$ for every value of $d$ and then  $$max_{s\in E} \left[  \begin{matrix} \sum_{i\in N} \ c_i (s) \end{matrix}\right] = 1$$
+Only when both edges are used we find the optimal social cost. \\ 
+If we denote with:  
+\begin{itemize}
+\item
+$x$ the number of players using the upper edge 
+\item
+$1-x$ the number of them using the lower edge
+\end{itemize}
+the linked social cost is
+$$C(x) = x * 1 + (1-x) * (1 - x)^d = x + (1-x)^{d+1}$$
+Minimizing this value, we can now found the optimal social cost . For this, we derive $C(x)$ and we obtain
+$$C^{'} (x) = 1 - (d+1) * (1 - x)^d  $$
+For $0 \le x \le 1$ we know that 
+$$ C^{''} (x) =  d*(d+1) * (1 - x)^{d-1}  $$
+is always greater or equal to 0. \\
+Now we can find the social cost minimum, identified by $x$ assuming $C^{'} (x) = 0$
+\begin{align*}
+	&1 - (d+1)(1 - x)^d  = 0\\
+	&\frac {1}{d+1} =  (1 - x)^d\\
+	&\sqrt[d]{\frac {1}{d+1}} = 1-x\\
+	&x = 1- \sqrt[d]{\frac {1}{d+1}}
+\end{align*}
+Therefore, the optimal social cost is 
+$$ 1- \sqrt[d]{\frac {1}{d+1}} + \left( \sqrt[d]{\frac {1}{d+1}}\right) ^{d+1}$$
+ and therefore the price of anarchy is
+ 
+ 
+$$ \frac {1} { 1- \sqrt[d]{\frac {1}{d+1}} + \left( \sqrt[d]{\frac {1}{d+1}}\right) ^{d+1}}$$
+that is a function of $ d $.\\
+In conclusion, from this result we can see that d is proportional inverse  to the optimal social cost and proportional directly to the price of anarchy, which become always more big.
+
+\clearpage
+
+\section{Problem 6}
+Before going into the details of the problem of finding a 2-edge colourable sub-graph of G with the maximum number of edges, we want to draw the Maximum Coverage problem. 
+Given a collection of sets $$U = \{ S_1,S_2, \dots , S_m \}$$ and a number k, we must maximize the number of items covered, select at most k sets from U. The greedy algorithm associated, at each iteration picks the set that covers the maximum number of uncovered elements.\\
+Let's now analyse the approximation of the algorithm. We introduce :
+\begin{itemize}
+\item
+$a_i$ - the number of covered elements at the $i^{th}$ iteration
+\item
+$b_i$ - the total number of covered elements up to the $i^{th}$ iteration
+\item
+$c_i$ - the number of uncovered elements after the $i^{th}$  iteration (that is equal to $c_i = OPT - b_i$)
+\item
+$OPT$ - the optimal solution of the maximum coverage problem
+\end{itemize}
+Moreover, we assume:
+\begin{itemize}
+\item
+$a_0=b_0=0$
+\item
+$c_0=OPT$
+
+\end{itemize}
+Let us consider two Lemmas.\\
+\newtheorem{lemma}{Lemma}
+\begin{lemma}
+	The value of $a_{i+1}$, i.e. the number of elements covered at the iteration number $i +1$, is always greater than or equal to the number of uncovered elements after the $i^{th}$ iteration divided by $k$. 
+	$$a_{i+1} \geq \frac{c_i}{k} $$
+\end{lemma}
+
+\begin{proof}
+	At each iteration, because the optimal solution OPT covering elements at k iterations, should be some sets in U whose size is greater than or equal to the number of the remaining elements discovered divided by k. If not, it means that it was not possible to cover OPT many elements at k steps from the optimal solution.
+\end{proof}
+
+\newpage
+\begin{lemma}
+	$$c_{i+1} \leq ( 1- \frac{1}{k})^{i+1} * OPT$$
+\end{lemma}
+
+\vspace{0.3 cm}
+
+\begin{proof}
+	Prove by induction. Let us start proving the base case, for $i=0$
+	\begin{align*}
+		c_{1} &\leq ( 1- \frac{1}{k}) * OPT\\
+		c_{1} &\leq OPT - \frac{1}{k} * OPT\\
+		OPT - b_1 &\leq OPT - \frac{1}{k} * OPT\\
+		- b_1 &\leq - \frac{1}{k} * OPT\\
+		b_1 &\geq  \frac{1}{k} * OPT
+	\end{align*}
+	Since $a_1=b_1$ 
+	\begin{align*}
+		a_1 \geq  \frac{1}{k}* OPT
+	\end{align*}	
+	Since we assume that $c_0=OPT$
+	\begin{align}
+		a_1 \geq  \frac{1}{k}c_0 \label{6.1}
+	\end{align}
+	By Lemma 1 we know that \ref{6.1} holds, therefore, the base case is proven.\\
+	Then, we assume that the inductive hypothesis
+	\begin{align*}
+		c_{i} \leq ( 1- \frac{1}{k})^{i} * OPT
+	\end{align*}
+	is true, and then we prove that 
+	$$c_{i+1} \leq ( 1- \frac{1}{k})^{i+1} * OPT$$  
+	is also true.
+	\\Then, by definition of $ c_i=OPT- \sum\limits_{j=1}^{i} a_j$ we have
+	$$c_{i+1} = c_i - a_{i+1}$$
+	Using Lemma 1 we can say that
+	\begin{align*}
+		c_{i+1} &\leq c_i - \frac{c_i}{k}\\
+		c_{i+1} &\leq c_i (1- \frac{1}{k})
+	\end{align*}
+	By the inductive hypothesis we state that
+	\begin{align*}
+		c_{i+1} &\leq (1- \frac{1}{k})^{i} * OPT * (1- \frac{1}{k})\\
+		c_{i+1} &\leq (1- \frac{1}{k})^{i+1} * OPT
+	\end{align*}
+\end{proof}
+
+Let us analyse our case. We can derive the approximation ratio of our algorithm for the 2-edge colourable problem by using the Maximum Coverage Problem. In our case the Set $U$ will contain exactly two sets, which are the two matching $M_1$ and $M_2$. Choosing then $k=2$, we will perform two iterations of the greedy algorithm for the Maximum Coverage problem. \\
+Starting from Lemma 2, we can result the approximation ratio
+$$c_{2} \leq ( 1- \frac{1}{2})^{2} * OPT$$
+Since $c_2 = OPT - b_2$
+\begin{align*}
+	OPT- b_{2} &\leq ( 1- \frac{1}{2})^{2} * OPT\\
+	OPT- b_{2} &\leq (\frac{1}{2})^{2} * OPT\\
+	b_{2} &\geq OPT - (\frac{1}{2})^{2} * OPT\\
+	b_{2} &\geq OPT - \frac {OPT}{4}\\
+	b_{2} &\geq \frac {3}{4} *OPT
+\end{align*}
+We proved that the algorithm is a $\frac {3}{4}$ approximation for 2-edge colourable problem. In fact, $b_2$ represents the total number of covered elements after the second iteration.
+
+
+\end{document}

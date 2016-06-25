@@ -8,7 +8,7 @@
  *
  ******************************************************************************/
 
-package roadwork;
+package hw1.roadwork;
 
 /**
  *  The <tt>FordFulkerson</tt> class represents a data type for computing a

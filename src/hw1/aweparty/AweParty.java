@@ -1,4 +1,4 @@
-package aweparty;
+package hw1.aweparty;
 
 import java.io.BufferedReader;
 import java.io.IOException;

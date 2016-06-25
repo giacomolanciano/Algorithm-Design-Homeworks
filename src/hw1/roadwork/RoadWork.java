@@ -1,4 +1,4 @@
-package roadwork;
+package hw1.roadwork;
 
 import java.io.BufferedReader;
 import java.io.IOException;

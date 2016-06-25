@@ -7,7 +7,7 @@
  *
  ******************************************************************************/
 
-package roadwork;
+package hw1.roadwork;
 
 import java.util.ArrayList;
 import java.util.InputMismatchException;

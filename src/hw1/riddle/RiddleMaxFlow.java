@@ -1,13 +1,13 @@
-package riddle;
+package hw1.riddle;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import roadwork.FlowEdge;
-import roadwork.FlowNetwork;
-import roadwork.FordFulkerson;
-import roadwork.StdOut;
+import hw1.roadwork.FlowEdge;
+import hw1.roadwork.FlowNetwork;
+import hw1.roadwork.FordFulkerson;
+import hw1.roadwork.StdOut;
 
 public class RiddleMaxFlow {
 

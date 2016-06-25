@@ -1,4 +1,4 @@
-package riddle;
+package hw1.riddle;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
